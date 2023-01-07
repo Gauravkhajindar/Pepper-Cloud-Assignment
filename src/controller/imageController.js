@@ -1,9 +1,9 @@
-
+// ==+==+==+==+==+==+==+==+==+==[Requirements]==+==+==+==+==+==+==+==+==+==
 const imageModel = require("../model/ImageModel")
 const validator = require("../validations/validator")
 const uploadFile = require('../aws/uploadFile')
 
-
+// ==+==+==+==+==+==+==+==+==+==[Create Image]==+==+==+==+==+==+==+==+==+==
 const createImage = async function (req, res) {
     try {
 
@@ -31,7 +31,6 @@ const createImage = async function (req, res) {
         if (mm < 10) mm = '0' + mm;
 
         const formattedToday = dd + '-' + mm + '-' + yyyy;
-        console.log(formattedToday)
         data.uploadedDate = formattedToday
 
         let imagedata = await imageModel.create(data)
@@ -41,7 +40,7 @@ const createImage = async function (req, res) {
     }
 }
 
-
+// ==+==+==+==+==+==+==+==+==+==[Get Image]==+==+==+==+==+==+==+==+==+==
 const getImage = async function (req, res) {
 
     try {
@@ -55,7 +54,7 @@ const getImage = async function (req, res) {
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: `you can't update on ${Object.keys(rest)} key` })
 
         if (uploadedDate) searchObj.uploadedDate ={$eq: uploadedDate}  
-        
+
         if (uploadedDateGreaterThan) searchObj.uploadedDate = { $gt: uploadedDateGreaterThan }
 
         if (uploadedDateLessThan) searchObj.uploadedDate = { $lt: uploadedDateLessThan }

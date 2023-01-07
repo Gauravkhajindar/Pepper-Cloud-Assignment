@@ -2,35 +2,27 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const route = require("./route/routes");
-const mongoose = require("mongoose");
+const connection=require("./database/db")
 const app = express();
 const multer = require('multer')
-// const dotnet= require("dotenv")
+const dotnet= require("dotenv")
 
 app.use(bodyParser.json());
 app.use(multer().any());
 app.use(bodyParser.urlencoded({extended : true}));
-// dotnet.config()
+dotnet.config()
 
 // ==+==+==+==+==+==+==+==+==+==[Connect DataBase]==+==+==+==+==+==+==+==+==+==
-mongoose.set('strictQuery', true);
-// const USERNAME=process.env.DB_USERNAME
-// const PASSWORD=process.env.DB_PASSWORD
 
-// Connection(USERNAME,PASSWORD)
-mongoose
-  .connect(
-    "mongodb+srv://Gauravkhajindar:WWKCSP1WrPINTgvo@cluster0.2q2wy.mongodb.net/PepperCloudAssignmentDB",
-    {
-      useNewUrlParser: true,
-    }
-  )
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err.message));
+const PORT= process.env.PORT || 3000
+
+const USERNAME=process.env.DB_USERNAME
+const PASSWORD=process.env.DB_PASSWORD
 
 app.use("/", route);
 
-app.listen(process.env.PORT || 3000, function () {
-  console.log("Port running on " + (process.env.PORT || 3000));
-});
+connection.Connection(USERNAME,PASSWORD)
+app.listen(PORT,()=>console.log(`Server is running Successfully on PORT ${PORT} `))
+
+
 
