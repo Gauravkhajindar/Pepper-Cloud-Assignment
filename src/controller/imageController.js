@@ -8,11 +8,9 @@ const createImage = async function (req, res) {
     try {
 
         let files = req.files
-        console.log(files)
+        let data1 = req.body
 
-
-        // let { ...rest}=files
-        // if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: `you can't update on ${Object.keys(rest)} key` })
+        if (Object.keys(data1).length > 0) return res.status(400).send({ status: false, message: `you can't create field ${Object.keys(data1)} key` })
 
         let data = {}
 
@@ -24,7 +22,6 @@ const createImage = async function (req, res) {
 
 
         data.image = await uploadFile.uploadFile(files[0])
-        // let date = new Date()
         let today = new Date();
         const yyyy = today.getFullYear();
         let mm = today.getMonth() + 1; // Months start at 0!
@@ -50,10 +47,10 @@ const getImage = async function (req, res) {
     try {
 
         let data = req.query
-        let { uploadedDate ,uploadedDateGreaterThan, uploadedDateLessThan, uploadedDateSort, ...rest} = data
-        
+        let { uploadedDate, uploadedDateGreaterThan, uploadedDateLessThan, uploadedDateSort, page, limit, ...rest } = data
+
         let filters
-        let searchObj={}
+        let searchObj = {}
         uploadedDateSort = parseInt(uploadedDateSort)
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: `you can't update on ${Object.keys(rest)} key` })
 
@@ -66,12 +63,14 @@ const getImage = async function (req, res) {
         if (uploadedDateSort > 1 || uploadedDateSort < -1 || uploadedDateSort == 0) return res.status(400).send({ status: false, message: 'Please enter either 1 or -1 is uploadedDateSort' })
         if (uploadedDateSort) filters = { uploadedDate: uploadedDateSort }
 
+        if (page || 1) { parseInt(page) }
+        if (limit || 3) { parseInt(limit) }
+        let skip = (page - 1) * limit
 
-   
 
-        // const imageData = await imageModel.find({ $and: [req.query] })
-        const imageData = await imageModel.find(searchObj).sort(filters)
-        res.status(200).send({ status: true, message: "Success", data: imageData })
+        const imageData = await imageModel.find(searchObj).sort(filters).skip(skip).limit(limit)
+        const totalCount = imageData.length
+        res.status(200).send({ status: true, message: "Success", data: imageData, totalCount })
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })
     }
