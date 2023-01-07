@@ -54,6 +54,8 @@ const getImage = async function (req, res) {
         uploadedDateSort = parseInt(uploadedDateSort)
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: `you can't update on ${Object.keys(rest)} key` })
 
+        if (uploadedDate) searchObj.uploadedDate ={$eq: uploadedDate}  
+        
         if (uploadedDateGreaterThan) searchObj.uploadedDate = { $gt: uploadedDateGreaterThan }
 
         if (uploadedDateLessThan) searchObj.uploadedDate = { $lt: uploadedDateLessThan }
