@@ -30,7 +30,7 @@ const createImage = async function (req, res) {
         if (dd < 10) dd = '0' + dd;
         if (mm < 10) mm = '0' + mm;
 
-        const formattedToday = dd + '-' + mm + '-' + yyyy;
+        const formattedToday = yyyy + '-' + mm + '-' + dd;
         data.uploadedDate = formattedToday
 
         let imagedata = await imageModel.create(data)
@@ -48,26 +48,47 @@ const getImage = async function (req, res) {
         let data = req.query
         let { uploadedDate, uploadedDateGreaterThan, uploadedDateLessThan, uploadedDateSort, page, limit, ...rest } = data
 
+
         let filters
         let searchObj = {}
         uploadedDateSort = parseInt(uploadedDateSort)
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: `you can't update on ${Object.keys(rest)} key` })
 
-        if (uploadedDate) searchObj.uploadedDate ={$eq: uploadedDate}  
+        // validation for uploadedDate
+        if (uploadedDate) {
+            if (!validator.Dateregex(uploadedDate)) return res.status(400).send({ status: false, message: "uploadedDate is invalid it must be yyyy-MM-dd format" })
+            if (uploadedDate) searchObj.uploadedDate = { $eq: uploadedDate }
+        }
 
-        if (uploadedDateGreaterThan) searchObj.uploadedDate = { $gt: uploadedDateGreaterThan }
+        // validation for uploadedDateGreaterThan
+        if (uploadedDateGreaterThan) {
+            if (!validator.Dateregex(uploadedDateGreaterThan)) return res.status(400).send({ status: false, message: "uploadedDateGreaterThan is invalid it must be yyyy-MM-dd format" })
+            if (uploadedDateGreaterThan) searchObj.uploadedDate = { $gt: uploadedDateGreaterThan }
+        }
 
-        if (uploadedDateLessThan) searchObj.uploadedDate = { $lt: uploadedDateLessThan }
+        // validation for uploadedDateLessThan
+        if (uploadedDateLessThan) {
+            if (!validator.Dateregex(uploadedDateLessThan)) return res.status(400).send({ status: false, message: "uploadedDateLessThan is invalid it must be yyyy-MM-dd format" })
+            if (uploadedDateLessThan) searchObj.uploadedDate = { $lt: uploadedDateLessThan }
+        }
 
         if (uploadedDateGreaterThan && uploadedDateLessThan) searchObj.uploadedDate = { $gt: uploadedDateGreaterThan, $lt: uploadedDateLessThan }
 
         if (uploadedDateSort > 1 || uploadedDateSort < -1 || uploadedDateSort == 0) return res.status(400).send({ status: false, message: 'Please enter either 1 or -1 is uploadedDateSort' })
         if (uploadedDateSort) filters = { uploadedDate: uploadedDateSort }
 
+        // validation for page
+        if (page) {
+            if (!validator.isValidNumber(page)) return res.status(400).send({ status: false, message: "Please enter valid number in page" })
+        }
+
+        // validation for limit
+        if (limit) {
+            if (!validator.isValidNumber(limit)) return res.status(400).send({ status: false, message: "Please enter valid number in limit" })
+        }
         if (page || 1) { parseInt(page) }
         if (limit || 3) { parseInt(limit) }
         let skip = (page - 1) * limit
-
 
         const imageData = await imageModel.find(searchObj).sort(filters).skip(skip).limit(limit)
         const totalCount = imageData.length
